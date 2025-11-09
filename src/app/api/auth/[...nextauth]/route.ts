@@ -2,6 +2,30 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
 
+declare module 'next-auth' {
+  interface User {
+    id: string;
+    role?: string;
+  }
+
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      role?: string;
+    };
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    id: string;
+    role?: string;
+  }
+}
+
 const handler = NextAuth({
   providers: [
     GoogleProvider({
@@ -15,9 +39,10 @@ const handler = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
+      console.log('OAuth sign in attempt:', { provider: account?.provider, email: user.email });
       try {
         // Send user data to backend for registration/login
-        const response = await fetch('http://localhost:5000/api/auth/oauth', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}/api/auth/oauth`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -32,16 +57,18 @@ const handler = NextAuth({
         });
 
         if (!response.ok) {
-          console.error('Backend OAuth registration failed');
+          console.error('Backend OAuth registration failed:', response.status, response.statusText);
           return false;
         }
 
         const data = await response.json();
+        console.log('OAuth registration successful:', { userId: data.user.id, role: data.user.role });
         user.id = data.user.id;
         user.role = data.user.role;
         return true;
       } catch (error) {
         console.error('OAuth sign in error:', error);
+        console.log('Error details:', { message: error instanceof Error ? error.message : 'Unknown error' });
         return false;
       }
     },

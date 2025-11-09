@@ -23,7 +23,8 @@ export default function ProductsPage() {
     brand: '',
     minPrice: '',
     maxPrice: '',
-    sort: 'newest'
+    sort: 'newest',
+    search: ''
   })
 
   useEffect(() => {
@@ -62,6 +63,17 @@ export default function ProductsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Products</h1>
+
+      {/* Search */}
+      <div className="bg-white p-4 rounded-lg shadow-md mb-8">
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={filters.search}
+          onChange={(e) => handleFilterChange('search', e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded-md mb-4"
+        />
+      </div>
 
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow-md mb-8">

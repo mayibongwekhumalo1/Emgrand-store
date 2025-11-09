@@ -1,36 +1,108 @@
-import React from 'react'
-import Link from 'next/link'
+// components/Sidebar.tsx
+import { ChevronRight } from "lucide-react";
 
-interface SidebarProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+export default function Sidebar({ isOpen, onClose, onFilterChange }: { isOpen?: boolean; onClose?: () => void; onFilterChange?: (filter: string) => void } = {}) {
+   console.log('Sidebar rendering with props:', { isOpen, onClose, onFilterChange });
   return (
-    <>
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose}></div>
-      )}
-      <div className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out z-50`}>
-        <div className="p-4">
-          <button onClick={onClose} className="absolute top-4 right-4 text-gray-600 hover:text-gray-800">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          <h2 className="text-xl font-bold mb-4">Menu</h2>
-          <ul className="space-y-2">
-            <li><Link href="/" className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded">Home</Link></li>
-            <li><Link href="/products" className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded">Products</Link></li>
-            <li><Link href="/categories" className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded">Categories</Link></li>
-            <li><Link href="/about" className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded">About</Link></li>
-            <li><Link href="/contact" className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded">Contact</Link></li>
-          </ul>
+    <aside className="w-full md:w-64 lg:w-60">
+      <div className="bg-white rounded-xl p-4 shadow-sm sticky top-24">
+        <h3 className="font-medium text-gray-800 mb-3">Category</h3>
+
+        <ul className="space-y-2 text-sm text-gray-600">
+          <li className="flex items-center justify-between p-2 rounded-md bg-gray-50">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                className="accent-black"
+                onChange={() => {
+                  console.log('All Product checkbox clicked');
+                  onFilterChange?.('All Product');
+                }}
+              />
+              <span>All Product</span>
+            </div>
+            <span className="text-xs text-gray-400">30</span>
+          </li>
+
+          <li className="pl-2">
+            <input
+              type="checkbox"
+              className="accent-black mr-2"
+              onChange={() => {
+                console.log('For Home checkbox clicked');
+                onFilterChange?.('For Home');
+              }}
+            />
+            For Home
+          </li>
+          <li className="pl-2">
+            <input
+              type="checkbox"
+              className="accent-black mr-2"
+              onChange={() => {
+                console.log('For Music checkbox clicked');
+                onFilterChange?.('For Music');
+              }}
+            />
+            For Music
+          </li>
+          <li className="pl-2">
+            <input
+              type="checkbox"
+              className="accent-black mr-2"
+              onChange={() => {
+                console.log('For Phone checkbox clicked');
+                onFilterChange?.('For Phone');
+              }}
+            />
+            For Phone
+          </li>
+          <li className="pl-2">
+            <input
+              type="checkbox"
+              className="accent-black mr-2"
+              onChange={() => {
+                console.log('For Storage checkbox clicked');
+                onFilterChange?.('For Storage');
+              }}
+            />
+            For Storage
+          </li>
+        </ul>
+
+        <div className="mt-4 border-t pt-3 text-sm text-gray-600">
+          <div
+            className="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-50 rounded px-2"
+            onClick={() => {
+              console.log('New Arrival clicked');
+              onFilterChange?.('New Arrival');
+            }}
+          >
+            <span>New Arrival</span>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+          </div>
+          <div
+            className="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-50 rounded px-2"
+            onClick={() => {
+              console.log('Best Seller clicked');
+              onFilterChange?.('Best Seller');
+            }}
+          >
+            <span>Best Seller</span>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+          </div>
+          <div
+            className="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-50 rounded px-2"
+            onClick={() => {
+              console.log('On Discount clicked');
+              onFilterChange?.('On Discount');
+            }}
+          >
+            <span>On Discount</span>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+          </div>
         </div>
       </div>
-    </>
-  )
+    </aside>
+  );
 }
-
-export default Sidebar

@@ -1,61 +1,20 @@
-import React, { useState } from 'react'
-
-const Newsletter: React.FC = () => {
-  const [email, setEmail] = useState('')
-  const [message, setMessage] = useState('')
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      const response = await fetch('http://localhost:5000/api/newsletter/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      })
-
-      if (response.ok) {
-        setMessage('Thank you for subscribing!')
-        setEmail('')
-      } else {
-        setMessage('Something went wrong. Please try again.')
-      }
-    } catch (error) {
-      console.error('Error subscribing to newsletter:', error)
-      setMessage('Something went wrong. Please try again.')
-    }
-  }
-
+// components/Newsletter.tsx
+export default function Newsletter() {
   return (
-    <section className="py-12 bg-blue-600 text-white">
-      <div className="container mx-auto px-4 text-center">
-        <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
-        <p className="text-xl mb-8">Subscribe to our newsletter for the latest deals and products</p>
-        <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-          <div className="flex">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="flex-grow px-4 py-2 rounded-l-lg text-gray-900"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-yellow-500 text-gray-900 px-6 py-2 rounded-r-lg font-semibold hover:bg-yellow-400 transition duration-300"
-            >
-              Subscribe
-            </button>
-          </div>
+    <section className="max-w-7xl mx-auto px-4 lg:px-8 mt-12">
+      <div className="bg-gradient-to-r from-gray-900 to-gray-700 text-white rounded-2xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div>
+          <h3 className="text-2xl font-bold">Ready to Get Our New Stuff?</h3>
+          <p className="mt-2 text-sm text-gray-200 max-w-md">
+            Stuffus for Homes and Needs — We'll listen to your needs, identify the best approach, and create a bespoke solution.
+          </p>
+        </div>
+
+        <form className="flex items-center gap-3 w-full md:w-auto">
+          <input className="rounded-full px-4 py-2 text-gray-900 w-full md:w-72" placeholder="Your Email" />
+          <button className="bg-white text-gray-900 rounded-full px-5 py-2">Send</button>
         </form>
-        {message && (
-          <p className="mt-4 text-lg">{message}</p>
-        )}
       </div>
     </section>
-  )
+  );
 }
-
-export default Newsletter

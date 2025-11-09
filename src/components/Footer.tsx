@@ -1,53 +1,45 @@
-import React from 'react'
-import Link from 'next/link'
 
-const Footer: React.FC = () => {
+import Link from "next/link";
+
+export default function Footer() {
   return (
-    <footer className="bg-gray-800 text-white py-12">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <h3 className="text-xl font-bold mb-4">Emgrand Digital</h3>
-            <p className="text-gray-400">
-              Your one-stop shop for all your digital needs. Quality products at affordable prices.
-            </p>
-          </div>
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              <li><Link href="/" className="text-gray-400 hover:text-white">Home</Link></li>
-              <li><Link href="/products" className="text-gray-400 hover:text-white">Products</Link></li>
-              <li><Link href="/about" className="text-gray-400 hover:text-white">About Us</Link></li>
-              <li><Link href="/contact" className="text-gray-400 hover:text-white">Contact</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Categories</h4>
-            <ul className="space-y-2">
-              <li><Link href="/products?category=electronics" className="text-gray-400 hover:text-white">Electronics</Link></li>
-              <li><Link href="/products?category=clothing" className="text-gray-400 hover:text-white">Clothing</Link></li>
-              <li><Link href="/products?category=books" className="text-gray-400 hover:text-white">Books</Link></li>
-              <li><Link href="/products?category=home" className="text-gray-400 hover:text-white">Home & Garden</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li>123 Digital Street</li>
-              <li>Tech City, TC 12345</li>
-              <li>Phone: (555) 123-4567</li>
-              <li>Email: info@emgranddigital.com</li>
-            </ul>
+    <footer className="mt-12 bg-white">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <h4 className="font-semibold text-gray-800">About</h4>
+          <ul className="mt-3 text-sm text-gray-600 space-y-2">
+            <li><Link href="#">Blog</Link></li>
+            <li><Link href="#">Meet The Team</Link></li>
+            <li><Link href="#">Contact Us</Link></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-semibold text-gray-800">Support</h4>
+          <ul className="mt-3 text-sm text-gray-600 space-y-2">
+            <li><Link href="#">Contact Us</Link></li>
+            <li><Link href="#">Shipping</Link></li>
+            <li><Link href="#">Return</Link></li>
+            <li><Link href="#">FAQ</Link></li>
+          </ul>
+        </div>
+
+        <div className="flex flex-col justify-between">
+          <div className="text-sm text-gray-600">Subscribe for updates</div>
+          <div className="flex items-center gap-3 mt-2">
+            <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center">x</div>
+            <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center">f</div>
+            <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center">in</div>
+            <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center">ig</div>
           </div>
         </div>
-        <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-          <p className="text-gray-400">
-            &copy; 2024 Emgrand Digital. All rights reserved.
-          </p>
+      </div>
+
+      <div className="border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4 text-xs text-gray-500">
+          © {new Date().getFullYear()} Stuffus. All rights reserved.
         </div>
       </div>
     </footer>
-  )
+  );
 }
-
-export default Footer

@@ -1,34 +1,59 @@
-import React from 'react'
-import Link from 'next/link'
+// components/Navbar.tsx
+"use client";
+import Link from "next/link";
+import { ShoppingCart, Search } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-const Navbar: React.FC = () => {
+export default function Navbar() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
-    <nav className="bg-white shadow-md">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-gray-800">
-          Emgrand Digital
-        </Link>
-        <div className="hidden md:flex space-x-6">
-          <Link href="/" className="text-gray-600 hover:text-gray-800">Home</Link>
-          <Link href="/products" className="text-gray-600 hover:text-gray-800">Products</Link>
-          <Link href="/about" className="text-gray-600 hover:text-gray-800">About</Link>
-          <Link href="/contact" className="text-gray-600 hover:text-gray-800">Contact</Link>
+    <header className="w-full bg-white border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white font-bold">
+              S
+            </div>
+            <span className="font-semibold text-gray-900">Stuffus</span>
+          </Link>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-gray-600">
+            <Link href="/">Beranda</Link>
+            <Link href="/shop" className="text-gray-900 font-medium">Shop</Link>
+            <Link href="/catalog">Catalog</Link>
+            <Link href="/blog">Blog</Link>
+          </nav>
         </div>
-        <div className="flex items-center space-x-4">
-          <Link href="/cart" className="text-gray-600 hover:text-gray-800">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v8a2 2 0 002 2h10a2 2 0 002-2v-3" />
-            </svg>
+
+        <div className="flex items-center gap-4">
+          <form onSubmit={handleSearch} className="hidden md:flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full text-sm">
+            <Search className="w-4 h-4 text-gray-600" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent outline-none text-gray-600 placeholder-gray-600"
+            />
+          </form>
+
+          <Link href="/cart" className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100">
+            <ShoppingCart className="w-5 h-5 text-gray-700" />
+            <span className="sr-only">Cart</span>
           </Link>
-          <Link href="/account" className="text-gray-600 hover:text-gray-800">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </Link>
+
+          <div className="w-8 h-8 rounded-full bg-gray-200" />
         </div>
       </div>
-    </nav>
-  )
+    </header>
+  );
 }
-
-export default Navbar

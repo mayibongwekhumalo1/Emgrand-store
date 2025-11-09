@@ -1,45 +1,210 @@
-import Link from 'next/link'
+
+"use client"
+
+
+import Hero from '@/components/Hero';
+import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
+import ProductCard from "@/components/ProductCard";
+import Recommendations from "@/components/Recommendations";
+import Newsletter from "@/components/Newsletter";
+import Footer from "@/components/Footer";
+import sampleProducts from "@/data/sampleProducts";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 export default function Home() {
-  return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Welcome to Our E-Commerce Store
-        </h1>
-        <p className="text-xl text-gray-600 mb-8">
-          Discover amazing products at great prices
-        </p>
-        <div className="space-x-4">
-          <Link
-            href="/products"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Shop Now
-          </Link>
-          <Link
-            href="/auth/login"
-            className="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            Sign In
-          </Link>
-        </div>
-      </div>
+   const [sidebarOpen, setSidebarOpen] = useState(false);
+   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+   const [currentPage, setCurrentPage] = useState(1);
 
-      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-2">Quality Products</h3>
-          <p className="text-gray-600">We offer only the highest quality products from trusted brands.</p>
+   // Filter products based on selected filters
+   const filteredProducts = selectedFilters.length === 0
+     ? sampleProducts
+     : sampleProducts.filter(product => {
+         if (selectedFilters.includes('All Product')) return true;
+         if (selectedFilters.includes('For Home') && product.category === 'Home') return true;
+         if (selectedFilters.includes('For Music') && product.category === 'Electronics') return true;
+         if (selectedFilters.includes('For Phone') && product.category === 'Electronics') return true;
+         if (selectedFilters.includes('For Storage') && product.category === 'Electronics') return true;
+         if (selectedFilters.includes('New Arrival')) return product.rating > 4.5;
+         if (selectedFilters.includes('Best Seller')) return product.reviewCount > 200;
+         if (selectedFilters.includes('On Discount')) return product.originalPrice && product.originalPrice > product.price;
+         return false;
+       });
+
+   // Paginate products
+   const productsPerPage = 9;
+   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+   const startIndex = (currentPage - 1) * productsPerPage;
+   const paginatedProducts = filteredProducts.slice(startIndex, startIndex + productsPerPage);
+
+   useEffect(() => {
+     console.log('Home component mounted');
+     console.log('sampleProducts:', sampleProducts);
+     console.log('sampleProducts length:', sampleProducts?.length);
+     if (sampleProducts && sampleProducts.length > 0) {
+       console.log('First product:', sampleProducts[0]);
+     }
+     console.log('Initial sidebarOpen state:', sidebarOpen);
+     console.log('Initial selectedFilters:', selectedFilters);
+     console.log('Initial currentPage:', currentPage);
+   }, []);
+
+   useEffect(() => {
+     console.log('Filters changed:', selectedFilters);
+     console.log('Filtered products count:', filteredProducts.length);
+     console.log('Total pages:', totalPages);
+   }, [selectedFilters, filteredProducts.length, totalPages]);
+
+   const handleFilterChange = (filter: string) => {
+     console.log('Filter change attempted:', filter);
+     console.log('Current filters before change:', selectedFilters);
+     setSelectedFilters(prev => {
+       const newFilters = prev.includes(filter)
+         ? prev.filter(f => f !== filter)
+         : [...prev, filter];
+       console.log('New filters after change:', newFilters);
+       return newFilters;
+     });
+     setCurrentPage(1); // Reset to first page when filters change
+   };
+
+   const handlePageChange = (page: number) => {
+     console.log('Page change attempted:', page);
+     console.log('Current page before change:', currentPage);
+     setCurrentPage(page);
+     console.log('Page changed to:', page);
+   };
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Navbar />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+      >
+        <Hero />
+      </motion.div>
+
+      <motion.main
+        className="max-w-7xl mx-auto px-4 lg:px-8 py-8"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.4 }}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Sidebar */}
+          <motion.div
+            className="lg:col-span-3"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onFilterChange={handleFilterChange} />
+          </motion.div>
+
+          {/* Product grid */}
+          <motion.div
+            className="lg:col-span-9"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedProducts.map((p, index) => (
+                <motion.div
+                  key={p._id + index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 * index }}
+                >
+                  <ProductCard product={p} />
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Pagination mock */}
+            <motion.div
+              className="mt-6 flex items-center justify-between text-sm text-gray-500"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 1.2 }}
+            >
+              <button
+                onClick={() => {
+                  console.log('Previous button clicked');
+                  handlePageChange(Math.max(1, currentPage - 1));
+                }}
+                className="hover:text-gray-700 cursor-pointer"
+              >
+                Previous
+              </button>
+              <div className="flex items-center gap-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => {
+                      console.log(`Page ${page} button clicked`);
+                      handlePageChange(page);
+                    }}
+                    className={`px-3 py-1 rounded cursor-pointer ${
+                      currentPage === page ? 'bg-black text-white' : 'bg-white shadow hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => {
+                  console.log('Next button clicked');
+                  handlePageChange(Math.min(totalPages, currentPage + 1));
+                }}
+                className="hover:text-gray-700 cursor-pointer"
+                disabled={currentPage >= totalPages}
+              >
+                Next
+              </button>
+            </motion.div>
+          </motion.div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-2">Fast Shipping</h3>
-          <p className="text-gray-600">Quick and reliable shipping to get your orders to you as soon as possible.</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-2">Secure Payments</h3>
-          <p className="text-gray-600">Safe and secure payment processing with multiple payment options.</p>
-        </div>
-      </div>
-    </main>
-  )
+
+        {/* Recommendations */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.4 }}
+        >
+          <Recommendations items={sampleProducts.slice(0, 4)} />
+        </motion.div>
+
+        {/* Newsletter */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.6 }}
+        >
+          <Newsletter />
+        </motion.div>
+
+      </motion.main>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 1.8 }}
+      >
+        <Footer />
+      </motion.div>
+    </>
+  );
 }

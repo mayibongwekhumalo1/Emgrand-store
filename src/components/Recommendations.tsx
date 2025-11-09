@@ -6,9 +6,9 @@ import { motion } from "framer-motion";
 
 interface Product {
   _id: string;
-  title: string;
+  name: string;
   price: number;
-  image?: string;
+  images: string[];
 }
 
 export default function Recommendations({ items }: { items: Product[] }) {
@@ -66,10 +66,10 @@ export default function Recommendations({ items }: { items: Product[] }) {
           >
             <div className="h-32 bg-gray-50 rounded-lg flex items-center justify-center">
               <Image
-                src={it.image ?? "/images/product-placeholder.png"}
+                src={it.images[0] || "/images/product-placeholder.png"}
                 width={150}
                 height={120}
-                alt={it.title}
+                alt={it.name}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 quality={85}
                 placeholder="blur"
@@ -77,7 +77,7 @@ export default function Recommendations({ items }: { items: Product[] }) {
               />
             </div>
             <div className="mt-3">
-              <h4 className="text-sm font-medium text-gray-800">{it.title}</h4>
+              <h4 className="text-sm font-medium text-gray-800">{it.name}</h4>
               <div className="mt-2 flex items-center justify-between">
                 <div className="text-xs text-gray-500">5.0 (2.1k Reviews)</div>
                 <div className="font-semibold text-gray-900">${it.price.toFixed(2)}</div>

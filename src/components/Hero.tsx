@@ -4,14 +4,29 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const heroImages = [
-  "https://res.cloudinary.com/dxrv8lauy/image/upload/v1750773814/samples/shoe.jpg",
-  "https://res.cloudinary.com/dxrv8lauy/image/upload/v1733773814/samples/ecommerce/accessories-bag.jpg",
-  "https://res.cloudinary.com/dxrv8lauy/image/upload/v1733773814/samples/ecommerce/leather-bag-gray.jpg"
-];
+interface Product {
+  _id: string
+  name: string
+  price: number
+  originalPrice?: number
+  images: string[]
+  category: string
+  brand: string
+  rating: number
+  reviewCount: number
+}
 
-export default function Hero() {
+export default function Hero({ products }: { products?: Product[] }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Use dynamic product images if available, otherwise fall back to static images
+  const heroImages = products && products.length > 0
+    ? products.slice(0, 3).map(product => product.images[0] || '/placeholder.jpg')
+    : [
+        "https://res.cloudinary.com/dxrv8lauy/image/upload/v1750773814/samples/shoe.jpg",
+        "https://res.cloudinary.com/dxrv8lauy/image/upload/v1733773814/samples/ecommerce/accessories-bag.jpg",
+        "https://res.cloudinary.com/dxrv8lauy/image/upload/v1733773814/samples/ecommerce/leather-bag-gray.jpg"
+      ];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -21,7 +36,7 @@ export default function Hero() {
     }, 5000); // Change image every 5 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [heroImages.length]);
 
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) =>

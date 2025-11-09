@@ -67,7 +67,7 @@ export default function CatalogPage() {
   return (
     <>
       <Navbar />
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
 
       {/* Hero Banner */}
       <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">

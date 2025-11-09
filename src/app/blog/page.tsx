@@ -6,88 +6,61 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
 interface BlogPost {
-  id: string
+  _id: string
   title: string
+  content: string
   excerpt: string
   author: string
-  date: string
-  image: string
+  slug: string
+  tags: string[]
   category: string
-  readTime: number
+  featuredImage?: string
+  published: boolean
+  publishedAt?: string
+  createdAt: string
+  updatedAt: string
+  seoTitle?: string
+  seoDescription?: string
+  readingTime?: number
 }
 
-const sampleBlogPosts: BlogPost[] = [
-  {
-    id: '1',
-    title: 'The Future of E-commerce: Trends to Watch in 2024',
-    excerpt: 'Explore the latest trends shaping the e-commerce landscape, from AI-powered personalization to sustainable shopping practices.',
-    author: 'Sarah Johnson',
-    date: '2024-01-15',
-    image: '/blog/ecommerce-trends.jpg',
-    category: 'E-commerce',
-    readTime: 5
-  },
-  {
-    id: '2',
-    title: 'Building a Sustainable Fashion Brand: Lessons Learned',
-    excerpt: 'How Stuffus implemented eco-friendly practices and what we learned along the way.',
-    author: 'Mike Chen',
-    date: '2024-01-10',
-    image: '/blog/sustainable-fashion.jpg',
-    category: 'Sustainability',
-    readTime: 7
-  },
-  {
-    id: '3',
-    title: 'Customer Experience: The Key to Online Success',
-    excerpt: 'Why focusing on customer experience can make or break your online business.',
-    author: 'Emma Davis',
-    date: '2024-01-05',
-    image: '/blog/customer-experience.jpg',
-    category: 'Business',
-    readTime: 4
-  },
-  {
-    id: '4',
-    title: 'Tech Innovations in Retail: What\'s Next?',
-    excerpt: 'From AR try-ons to smart inventory management, discover the tech transforming retail.',
-    author: 'Alex Rodriguez',
-    date: '2023-12-28',
-    image: '/blog/tech-retail.jpg',
-    category: 'Technology',
-    readTime: 6
-  },
-  {
-    id: '5',
-    title: 'The Art of Product Photography',
-    excerpt: 'Tips and tricks for creating stunning product photos that drive sales.',
-    author: 'Lisa Wang',
-    date: '2023-12-20',
-    image: '/blog/product-photography.jpg',
-    category: 'Photography',
-    readTime: 8
-  },
-  {
-    id: '6',
-    title: 'Understanding Consumer Behavior in the Digital Age',
-    excerpt: 'Insights into how modern consumers shop and what influences their purchasing decisions.',
-    author: 'David Kim',
-    date: '2023-12-15',
-    image: '/blog/consumer-behavior.jpg',
-    category: 'Marketing',
-    readTime: 6
-  }
-]
-
 export default function BlogPage() {
-  const [posts, setPosts] = useState<BlogPost[]>(sampleBlogPosts)
+  const [posts, setPosts] = useState<BlogPost[]>([])
+  const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState('All')
+
+  useEffect(() => {
+    fetchBlogs()
+  }, [])
+
+  const fetchBlogs = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/blogs`)
+      const data = await response.json()
+      setPosts(data.blogs || [])
+    } catch (error) {
+      console.error('Error fetching blogs:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const categories = ['All', ...Array.from(new Set(posts.map(post => post.category)))]
 
   const filteredPosts = selectedCategory === 'All'
     ? posts
     : posts.filter(post => post.category === selectedCategory)
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p>Loading blog posts...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -121,10 +94,10 @@ export default function BlogPage() {
         {/* Blog Posts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPosts.map((post) => (
-            <article key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+            <article key={post._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <div className="aspect-video bg-gray-200 relative">
                 <img
-                  src={post.image}
+                  src={post.featuredImage || '/placeholder.jpg'}
                   alt={post.title}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -142,13 +115,13 @@ export default function BlogPage() {
                 <div className="flex items-center text-sm text-gray-500 mb-2">
                   <span>{post.author}</span>
                   <span className="mx-2">•</span>
-                  <span>{new Date(post.date).toLocaleDateString()}</span>
+                  <span>{new Date(post.publishedAt || post.createdAt).toLocaleDateString()}</span>
                   <span className="mx-2">•</span>
-                  <span>{post.readTime} min read</span>
+                  <span>{post.readingTime || 5} min read</span>
                 </div>
 
                 <h2 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2">
-                  <Link href={`/blog/${post.id}`} className="hover:text-gray-700">
+                  <Link href={`/blog/${post.slug}`} className="hover:text-gray-700">
                     {post.title}
                   </Link>
                 </h2>
@@ -158,7 +131,7 @@ export default function BlogPage() {
                 </p>
 
                 <Link
-                  href={`/blog/${post.id}`}
+                  href={`/blog/${post.slug}`}
                   className="text-gray-900 font-medium hover:text-gray-700 inline-flex items-center"
                 >
                   Read more

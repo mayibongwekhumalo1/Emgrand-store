@@ -1,7 +1,6 @@
 
 "use client"
 
-
 import Hero from '@/components/Hero';
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
@@ -9,19 +8,48 @@ import ProductCard from "@/components/ProductCard";
 import Recommendations from "@/components/Recommendations";
 import Newsletter from "@/components/Newsletter";
 import Footer from "@/components/Footer";
-import sampleProducts from "@/data/sampleProducts";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
+interface Product {
+  _id: string
+  name: string
+  price: number
+  originalPrice?: number
+  images: string[]
+  category: string
+  brand: string
+  rating: number
+  reviewCount: number
+}
+
 export default function Home() {
+   const [products, setProducts] = useState<Product[]>([])
+   const [loading, setLoading] = useState(true)
    const [sidebarOpen, setSidebarOpen] = useState(false);
    const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
    const [currentPage, setCurrentPage] = useState(1);
 
+   useEffect(() => {
+     fetchProducts()
+   }, [])
+
+   const fetchProducts = async () => {
+     try {
+       const response = await fetch(`http://localhost:5000/api/products`)
+       const data = await response.json()
+       setProducts(data.products || [])
+     } catch (error) {
+       console.error('Error fetching products:', error)
+     } finally {
+       setLoading(false)
+     }
+   }
+
    // Filter products based on selected filters
    const filteredProducts = selectedFilters.length === 0
-     ? sampleProducts
-     : sampleProducts.filter(product => {
+     ? products
+     : products.filter(product => {
          if (selectedFilters.includes('All Product')) return true;
          if (selectedFilters.includes('For Home') && product.category === 'Home') return true;
          if (selectedFilters.includes('For Music') && product.category === 'Electronics') return true;
@@ -41,15 +69,15 @@ export default function Home() {
 
    useEffect(() => {
      console.log('Home component mounted');
-     console.log('sampleProducts:', sampleProducts);
-     console.log('sampleProducts length:', sampleProducts?.length);
-     if (sampleProducts && sampleProducts.length > 0) {
-       console.log('First product:', sampleProducts[0]);
+     console.log('Products:', products);
+     console.log('Products length:', products?.length);
+     if (products && products.length > 0) {
+       console.log('First product:', products[0]);
      }
      console.log('Initial sidebarOpen state:', sidebarOpen);
      console.log('Initial selectedFilters:', selectedFilters);
      console.log('Initial currentPage:', currentPage);
-   }, []);
+   }, [products, sidebarOpen, selectedFilters, currentPage]);
 
    useEffect(() => {
      console.log('Filters changed:', selectedFilters);
@@ -77,6 +105,17 @@ export default function Home() {
      console.log('Page changed to:', page);
    };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p>Loading products...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <>
       <motion.div
@@ -92,7 +131,7 @@ export default function Home() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.2 }}
       >
-        <Hero />
+        <Hero products={products} />
       </motion.div>
 
       <motion.main
@@ -184,7 +223,7 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.4 }}
         >
-          <Recommendations items={sampleProducts.slice(0, 4)} />
+          <Recommendations items={products.slice(0, 4)} />
         </motion.div>
 
         {/* Newsletter */}

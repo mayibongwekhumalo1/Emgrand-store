@@ -1,5 +1,6 @@
 
 import Link from "next/link";
+import { Twitter, Facebook, Linkedin, Instagram } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -27,10 +28,10 @@ export default function Footer() {
         <div className="flex flex-col justify-between">
           <div className="text-sm text-gray-600">Subscribe for updates</div>
           <div className="flex items-center gap-3 mt-2">
-            <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center">x</div>
-            <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center">f</div>
-            <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center">in</div>
-            <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center">ig</div>
+            <Twitter className="w-9 h-9 text-gray-900" />
+            <Facebook className="w-9 h-9 text-gray-900" />
+            <Linkedin className="w-9 h-9 text-gray-900" />
+            <Instagram className="w-9 h-9 text-gray-900" />
           </div>
         </div>
       </div>

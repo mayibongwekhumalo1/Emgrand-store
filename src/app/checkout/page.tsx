@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
@@ -18,7 +18,7 @@ interface Product {
   reviewCount: number
 }
 
-export default function CheckoutPage() {
+function CheckoutPageContent() {
   const searchParams = useSearchParams()
   const productId = searchParams.get('product')
 
@@ -329,5 +329,13 @@ export default function CheckoutPage() {
 
       <Footer />
     </>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-center">Loading checkout...</div></div>}>
+      <CheckoutPageContent />
+    </Suspense>
   )
 }

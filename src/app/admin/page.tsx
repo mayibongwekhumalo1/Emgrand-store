@@ -19,9 +19,12 @@ interface DashboardStats {
 interface AdminProduct {
   _id: string;
   name: string;
+  description: string;
   price: number;
   category: string;
+  brand: string;
   inventory: {
+    sku: string;
     quantity: number;
   };
   images: string[];
@@ -31,9 +34,15 @@ interface Blog {
   _id: string;
   title: string;
   content: string;
+  excerpt: string;
   author: string;
+  category: string;
+  tags: string[];
   createdAt: string;
   published: boolean;
+  featuredImage?: string;
+  seoTitle?: string;
+  seoDescription?: string;
 }
 
 export default function AdminDashboard() {

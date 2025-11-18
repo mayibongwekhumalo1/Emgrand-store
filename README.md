@@ -5,7 +5,6 @@ A full-stack e-commerce platform built with Next.js, TypeScript, Tailwind CSS, E
 ## Features
 
 ### Core Features
-- ✅ User authentication (registration, login, JWT)
 - ✅ Product catalog with search and filtering
 - ✅ Shopping cart functionality
 - ✅ Checkout process with payment integration (Stripe/PayPal)
@@ -20,9 +19,7 @@ A full-stack e-commerce platform built with Next.js, TypeScript, Tailwind CSS, E
 ### Technical Stack
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS
 - **Backend**: Express.js, TypeScript, MongoDB with Mongoose
-- **Authentication**: JWT (JSON Web Tokens)
 - **Payments**: Stripe and PayPal integration
-- **Email**: Nodemailer for notifications
 - **Architecture**: MVC pattern
 
 ## Project Structure
@@ -87,27 +84,15 @@ Create a `.env` file in the backend directory with the following variables:
 PORT=5000
 NODE_ENV=development
 MONGODB_URI=mongodb://localhost:27017/ecommerce
-JWT_SECRET=your_super_secret_jwt_key_here
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
 PAYPAL_MODE=sandbox
 PAYPAL_CLIENT_ID=your_paypal_client_id
 PAYPAL_CLIENT_SECRET=your_paypal_client_secret
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_SECURE=false
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_app_password
 FRONTEND_URL=http://localhost:3000
 ```
 
 ## API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `GET /api/auth/profile` - Get user profile
-- `PUT /api/auth/profile` - Update user profile
 
 ### Products
 - `GET /api/products` - Get all products (with filtering)
@@ -131,13 +116,6 @@ FRONTEND_URL=http://localhost:3000
 - `GET /api/orders/:id` - Get single order
 - `GET /api/orders/admin/all` - Get all orders (admin)
 - `PUT /api/orders/:id/status` - Update order status (admin)
-
-### Users (Admin)
-- `GET /api/users` - Get all users
-- `GET /api/users/stats` - Get user statistics
-- `GET /api/users/:id` - Get single user
-- `PUT /api/users/:id` - Update user
-- `DELETE /api/users/:id` - Delete user
 
 ## Development
 

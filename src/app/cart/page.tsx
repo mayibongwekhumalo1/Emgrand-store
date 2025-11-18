@@ -31,7 +31,7 @@ export default function CartPage() {
         return
       }
 
-      const response = await fetch('http://localhost:5000/api/cart', {
+      const response = await fetch('/api/cart', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -50,7 +50,7 @@ export default function CartPage() {
       const token = localStorage.getItem('token')
       if (!token) return
 
-      const response = await fetch('http://localhost:5000/api/cart', {
+      const response = await fetch('/api/cart/update', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -72,11 +72,13 @@ export default function CartPage() {
       const token = localStorage.getItem('token')
       if (!token) return
 
-      const response = await fetch(`http://localhost:5000/api/cart/${productId}`, {
+      const response = await fetch('/api/cart/remove', {
         method: 'DELETE',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify({ productId })
       })
 
       if (response.ok) {

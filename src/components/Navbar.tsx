@@ -4,12 +4,10 @@ import Link from "next/link";
 import { ShoppingCart, Search } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
-  const { data: session } = useSession();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,9 +27,7 @@ export default function Navbar() {
             <span className="font-semibold text-gray-900">Mikffus</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-           
             <Link href="/products" className="text-gray-900 font-medium">Shop</Link>
-            
             <Link href="/blog">Blog</Link>
           </nav>
         </div>
@@ -52,14 +48,6 @@ export default function Navbar() {
             <ShoppingCart className="w-5 h-5 text-gray-700" />
             <span className="sr-only">Cart</span>
           </Link>
-
-          {session?.user ? (
-            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-              {session.user.name?.charAt(0).toUpperCase() || 'U'}
-            </div>
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-200" />
-          )}
           
         </div>
       </div>

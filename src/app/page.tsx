@@ -24,15 +24,15 @@ interface Product {
 }
 
 export default function Home() {
-   const [products, setProducts] = useState<Product[]>([])
-   const [loading, setLoading] = useState(true)
-   const [sidebarOpen, setSidebarOpen] = useState(false);
-   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-   const [currentPage, setCurrentPage] = useState(1);
+    const [products, setProducts] = useState<Product[]>([])
+    const [loading, setLoading] = useState(true)
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
 
    useEffect(() => {
-     fetchProducts()
-   }, [])
+        fetchProducts();
+      }, [])
 
    const fetchProducts = async () => {
      try {

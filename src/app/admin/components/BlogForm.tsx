@@ -1,7 +1,14 @@
 "use client";
 
-import { useState } from 'react';
-import { X, Upload } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Upload, Cloud } from 'lucide-react';
+
+// Declare Cloudinary global
+declare global {
+  interface Window {
+    cloudinary: any;
+  }
+}
 
 interface Blog {
   _id?: string;
@@ -19,7 +26,7 @@ interface Blog {
 
 interface BlogFormProps {
   blog?: Blog;
-  onSubmit: (blogData: FormData) => Promise<void>;
+  onSubmit: (blogData: any) => Promise<void>;
   onCancel: () => void;
   loading: boolean;
 }
@@ -36,9 +43,66 @@ export default function BlogForm({ blog, onSubmit, onCancel, loading }: BlogForm
     seoTitle: blog?.seoTitle || '',
     seoDescription: blog?.seoDescription || '',
   });
-  const [featuredImage, setFeaturedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>(blog?.featuredImage || '');
+  const [featuredImage, setFeaturedImage] = useState<string>(blog?.featuredImage || '');
+  const [cloudinaryWidget, setCloudinaryWidget] = useState<any>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Load Cloudinary script and initialize widget
+  useEffect(() => {
+    const loadCloudinaryScript = () => {
+      if (window.cloudinary) {
+        initializeWidget();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://upload-widget.cloudinary.com/global/all.js';
+      script.onload = initializeWidget;
+      document.head.appendChild(script);
+    };
+
+    const initializeWidget = () => {
+      const widget = window.cloudinary.createUploadWidget(
+        {
+          cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+          uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
+          folder: 'ecommerce/blog',
+          cropping: true,
+          croppingAspectRatio: 1.5, // 3:2 aspect ratio for blog images
+          multiple: false,
+          maxFiles: 1,
+          clientAllowedFormats: ['png', 'jpg', 'jpeg', 'webp'],
+          maxFileSize: 5000000, // 5MB
+          sources: ['local', 'url', 'camera'],
+          styles: {
+            palette: {
+              window: '#FFFFFF',
+              windowBorder: '#90A0B3',
+              tabIcon: '#0078FF',
+              menuIcons: '#5A616A',
+              textDark: '#000000',
+              textLight: '#FFFFFF',
+              link: '#0078FF',
+              action: '#FF620C',
+              inactiveTabIcon: '#0E2F5A',
+              error: '#F44235',
+              inProgress: '#0078FF',
+              complete: '#20B832',
+              sourceBg: '#E4EBF1'
+            }
+          }
+        },
+        (error: any, result: any) => {
+          if (!error && result && result.event === 'success') {
+            setFeaturedImage(result.info.secure_url);
+          }
+        }
+      );
+      setCloudinaryWidget(widget);
+    };
+
+    loadCloudinaryScript();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -51,21 +115,14 @@ export default function BlogForm({ blog, onSubmit, onCancel, loading }: BlogForm
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFeaturedImage(file);
-      const url = URL.createObjectURL(file);
-      setImagePreview(url);
+  const openCloudinaryWidget = () => {
+    if (cloudinaryWidget) {
+      cloudinaryWidget.open();
     }
   };
 
   const removeImage = () => {
-    setFeaturedImage(null);
-    setImagePreview('');
-    if (blog?.featuredImage) {
-      // If editing and there's an existing image, we'll handle this in the backend
-    }
+    setFeaturedImage('');
   };
 
   const validateForm = () => {
@@ -86,21 +143,18 @@ export default function BlogForm({ blog, onSubmit, onCancel, loading }: BlogForm
 
     if (!validateForm()) return;
 
-    const submitData = new FormData();
-    submitData.append('title', formData.title);
-    submitData.append('content', formData.content);
-    submitData.append('excerpt', formData.excerpt);
-    submitData.append('author', formData.author);
-    submitData.append('category', formData.category);
-    submitData.append('tags', JSON.stringify(formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)));
-    submitData.append('published', formData.published.toString());
-    if (formData.seoTitle) submitData.append('seoTitle', formData.seoTitle);
-    if (formData.seoDescription) submitData.append('seoDescription', formData.seoDescription);
-
-    // Add featured image if selected
-    if (featuredImage) {
-      submitData.append('featuredImage', featuredImage);
-    }
+    const submitData = {
+      title: formData.title,
+      content: formData.content,
+      excerpt: formData.excerpt,
+      author: formData.author,
+      category: formData.category,
+      tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+      published: formData.published,
+      seoTitle: formData.seoTitle || undefined,
+      seoDescription: formData.seoDescription || undefined,
+      featuredImage: featuredImage || undefined
+    };
 
     await onSubmit(submitData);
   };
@@ -266,31 +320,27 @@ export default function BlogForm({ blog, onSubmit, onCancel, loading }: BlogForm
             </label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
               <div className="text-center">
-                <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                <Cloud className="mx-auto h-12 w-12 text-gray-400" />
                 <div className="mt-4">
-                  <label htmlFor="featured-image-upload" className="cursor-pointer">
-                    <span className="mt-2 block text-sm font-medium text-gray-900">
-                      Upload featured image
-                    </span>
-                    <input
-                      id="featured-image-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                  </label>
+                  <button
+                    type="button"
+                    onClick={openCloudinaryWidget}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Featured Image
+                  </button>
                   <p className="mt-1 text-xs text-gray-500">
-                    PNG, JPG, GIF up to 10MB
+                    PNG, JPG, WEBP up to 5MB
                   </p>
                 </div>
               </div>
             </div>
 
-            {imagePreview && (
+            {featuredImage && (
               <div className="mt-4 relative">
                 <img
-                  src={imagePreview}
+                  src={featuredImage}
                   alt="Featured image preview"
                   className="w-full h-48 object-cover rounded-lg"
                 />

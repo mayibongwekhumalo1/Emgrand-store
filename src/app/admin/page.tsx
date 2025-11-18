@@ -7,6 +7,8 @@ import ProductForm from './components/ProductForm';
 import BlogForm from './components/BlogForm';
 import AnalyticsCharts from './components/AnalyticsCharts';
 import MarketingTools from './components/MarketingTools';
+import { CldUploadWidget } from 'next-cloudinary';
+ 
 
 interface DashboardStats {
   totalUsers: number;
@@ -87,7 +89,7 @@ export default function AdminDashboard() {
         fetch('http://localhost:5000/api/users/stats', { headers }),
         fetch('http://localhost:5000/api/products', { headers }),
         fetch('http://localhost:5000/api/orders/admin/all', { headers }),
-        fetch('http://localhost:5000/api/blogs/admin/all', { headers })
+        fetch('/api/blog?admin=all', { headers })
       ]);
 
       if (usersRes.ok) {
@@ -146,7 +148,7 @@ export default function AdminDashboard() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/blogs/${blogId}`, {
+      const response = await fetch(`/api/blog/${blogId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -159,7 +161,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleProductSubmit = async (productData: FormData) => {
+  const handleProductSubmit = async (productData: any) => {
     setProductFormLoading(true);
     try {
       const token = localStorage.getItem('token');
@@ -170,8 +172,11 @@ export default function AdminDashboard() {
 
       const response = await fetch(url, {
         method,
-        headers: { Authorization: `Bearer ${token}` },
-        body: productData
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(productData)
       });
 
       if (response.ok) {
@@ -210,19 +215,22 @@ export default function AdminDashboard() {
     setShowBlogForm(true);
   };
 
-  const handleBlogSubmit = async (blogData: FormData) => {
+  const handleBlogSubmit = async (blogData: any) => {
     setBlogFormLoading(true);
     try {
       const token = localStorage.getItem('token');
       const url = editingBlog
-        ? `http://localhost:5000/api/blogs/${editingBlog._id}`
-        : 'http://localhost:5000/api/blogs';
+        ? `/api/blog/${editingBlog._id}`
+        : '/api/blog';
       const method = editingBlog ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
-        headers: { Authorization: `Bearer ${token}` },
-        body: blogData
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(blogData)
       });
 
       if (response.ok) {

@@ -1,7 +1,14 @@
 "use client";
 
-import { useState } from 'react';
-import { X, Upload } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Upload, Cloud } from 'lucide-react';
+
+// Declare Cloudinary global
+declare global {
+  interface Window {
+    cloudinary: any;
+  }
+}
 
 interface Product {
   _id?: string;
@@ -19,7 +26,7 @@ interface Product {
 
 interface ProductFormProps {
   product?: Product;
-  onSubmit: (productData: FormData) => Promise<void>;
+  onSubmit: (productData: any) => Promise<void>;
   onCancel: () => void;
   loading: boolean;
 }
@@ -34,9 +41,64 @@ export default function ProductForm({ product, onSubmit, onCancel, loading }: Pr
     sku: product?.inventory?.sku || '',
     quantity: product?.inventory?.quantity || 0,
   });
-  const [images, setImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>(product?.images || []);
+  const [cloudinaryWidget, setCloudinaryWidget] = useState<any>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Load Cloudinary script and initialize widget
+  useEffect(() => {
+    const loadCloudinaryScript = () => {
+      if (window.cloudinary) {
+        initializeWidget();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://upload-widget.cloudinary.com/global/all.js';
+      script.onload = initializeWidget;
+      document.head.appendChild(script);
+    };
+
+    const initializeWidget = () => {
+      const widget = window.cloudinary.createUploadWidget(
+        {
+          cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+          uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
+          folder: 'ecommerce/products',
+          multiple: true,
+          maxFiles: 10,
+          clientAllowedFormats: ['png', 'jpg', 'jpeg', 'webp'],
+          maxFileSize: 5000000, // 5MB
+          sources: ['local', 'url', 'camera'],
+          styles: {
+            palette: {
+              window: '#FFFFFF',
+              windowBorder: '#90A0B3',
+              tabIcon: '#0078FF',
+              menuIcons: '#5A616A',
+              textDark: '#000000',
+              textLight: '#FFFFFF',
+              link: '#0078FF',
+              action: '#FF620C',
+              inactiveTabIcon: '#0E2F5A',
+              error: '#F44235',
+              inProgress: '#0078FF',
+              complete: '#20B832',
+              sourceBg: '#E4EBF1'
+            }
+          }
+        },
+        (error: any, result: any) => {
+          if (!error && result && result.event === 'success') {
+            setImageUrls(prev => [...prev, result.info.secure_url]);
+          }
+        }
+      );
+      setCloudinaryWidget(widget);
+    };
+
+    loadCloudinaryScript();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -49,25 +111,14 @@ export default function ProductForm({ product, onSubmit, onCancel, loading }: Pr
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setImages(prev => [...prev, ...files]);
-
-    // Create preview URLs
-    files.forEach(file => {
-      const url = URL.createObjectURL(file);
-      setImageUrls(prev => [...prev, url]);
-    });
+  const openCloudinaryWidget = () => {
+    if (cloudinaryWidget) {
+      cloudinaryWidget.open();
+    }
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-    setImageUrls(prev => {
-      const newUrls = prev.filter((_, i) => i !== index);
-      // Revoke object URLs to prevent memory leaks
-      URL.revokeObjectURL(prev[index]);
-      return newUrls;
-    });
+    setImageUrls(prev => prev.filter((_, i) => i !== index));
   };
 
   const validateForm = () => {
@@ -80,7 +131,7 @@ export default function ProductForm({ product, onSubmit, onCancel, loading }: Pr
     if (!formData.brand.trim()) newErrors.brand = 'Brand is required';
     if (!formData.sku.trim()) newErrors.sku = 'SKU is required';
     if (formData.quantity < 0) newErrors.quantity = 'Quantity cannot be negative';
-    if (images.length === 0 && imageUrls.length === 0) newErrors.images = 'At least one image is required';
+    if (imageUrls.length === 0) newErrors.images = 'At least one image is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -91,26 +142,18 @@ export default function ProductForm({ product, onSubmit, onCancel, loading }: Pr
 
     if (!validateForm()) return;
 
-    const submitData = new FormData();
-    submitData.append('name', formData.name);
-    submitData.append('description', formData.description);
-    submitData.append('price', formData.price.toString());
-    submitData.append('category', formData.category);
-    submitData.append('brand', formData.brand);
-    submitData.append('inventory', JSON.stringify({
-      sku: formData.sku,
-      quantity: formData.quantity
-    }));
-
-    // Add existing images if editing
-    if (product?._id) {
-      submitData.append('existingImages', JSON.stringify(imageUrls));
-    }
-
-    // Add new images
-    images.forEach(image => {
-      submitData.append('images', image);
-    });
+    const submitData = {
+      name: formData.name,
+      description: formData.description,
+      price: formData.price,
+      category: formData.category,
+      brand: formData.brand,
+      inventory: {
+        sku: formData.sku,
+        quantity: formData.quantity
+      },
+      images: imageUrls
+    };
 
     await onSubmit(submitData);
   };
@@ -271,23 +314,18 @@ export default function ProductForm({ product, onSubmit, onCancel, loading }: Pr
             </label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
               <div className="text-center">
-                <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                <Cloud className="mx-auto h-12 w-12 text-gray-400" />
                 <div className="mt-4">
-                  <label htmlFor="image-upload" className="cursor-pointer">
-                    <span className="mt-2 block text-sm font-medium text-gray-900">
-                      Upload images
-                    </span>
-                    <input
-                      id="image-upload"
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                  </label>
+                  <button
+                    type="button"
+                    onClick={openCloudinaryWidget}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Images
+                  </button>
                   <p className="mt-1 text-xs text-gray-500">
-                    PNG, JPG, GIF up to 10MB each
+                    PNG, JPG, WEBP up to 5MB each
                   </p>
                 </div>
               </div>

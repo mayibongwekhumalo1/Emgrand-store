@@ -29,6 +29,8 @@ export default function Navbar() {
           <nav className="hidden md:flex items-center gap-6 text-sm text-gray-600">
             <Link href="/products" className="text-gray-900 font-medium">Shop</Link>
             <Link href="/blog">Blog</Link>
+            <Link href="/admin">Dashboard</Link>
+
           </nav>
         </div>
 

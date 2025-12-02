@@ -35,7 +35,7 @@ export default function BlogPage() {
 
   const fetchBlogs = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/blogs`)
+      const response = await fetch(`/api/blog`)
       const data = await response.json()
       setPosts(data.blogs || [])
     } catch (error) {

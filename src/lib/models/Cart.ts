@@ -44,9 +44,18 @@ const cartItemSchema = new Schema({
 
 const cartSchema = new Schema<ICart>({
   user: {
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.Mixed,
     ref: 'User',
-    required: true
+    required: true,
+    validate: {
+      validator: function(value: any) {
+        // Allow ObjectId or string 'guest'
+        return (typeof value === 'string' && value === 'guest') ||
+               (value && typeof value === 'object' && value.constructor.name === 'ObjectId') ||
+               (typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value));
+      },
+      message: 'User must be a valid ObjectId or "guest"'
+    }
   },
   items: [cartItemSchema],
   totalPrice: {

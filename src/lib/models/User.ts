@@ -27,6 +27,8 @@ export interface IUser extends Document {
   lastLogin?: Date;
   loginAttempts: number;
   lockUntil?: Date;
+  twoFactorSecret?: string;
+  twoFactorEnabled: boolean;
   createdAt: Date;
   updatedAt: Date;
   comparePassword?(candidatePassword: string): Promise<boolean>;
@@ -130,6 +132,14 @@ const userSchema = new Schema<IUser>({
   lockUntil: {
     type: Date,
     default: null
+  },
+  twoFactorSecret: {
+    type: String,
+    default: null
+  },
+  twoFactorEnabled: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

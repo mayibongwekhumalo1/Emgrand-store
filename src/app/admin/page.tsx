@@ -85,30 +85,24 @@ export default function AdminDashboard() {
       const headers = { Authorization: `Bearer ${token}` };
 
       // Fetch stats
-      const [usersRes, productsRes, ordersRes, blogsRes] = await Promise.all([
-        fetch('http://localhost:5000/api/users/stats', { headers }),
-        fetch('http://localhost:5000/api/products', { headers }),
-        fetch('http://localhost:5000/api/orders/admin/all', { headers }),
+      const [productsRes, ordersRes, blogsRes] = await Promise.all([
+        fetch('/api/products', { headers }),
+        fetch('/api/orders?admin=all', { headers }),
         fetch('/api/blog?admin=all', { headers })
       ]);
-
-      if (usersRes.ok) {
-        const userStats = await usersRes.json();
-        setStats(prev => ({ ...prev, totalUsers: userStats.totalUsers || 0 }));
-      }
 
       if (productsRes.ok) {
         const productsData = await productsRes.json();
         setProducts(productsData.products || []);
-        setStats(prev => ({ ...prev, totalProducts: productsData.total || 0 }));
+        setStats(prev => ({ ...prev, totalProducts: productsData.pagination.totalProducts || 0 }));
       }
 
       if (ordersRes.ok) {
         const ordersData = await ordersRes.json();
-        const totalRevenue = ordersData.reduce((sum: number, order: { totalAmount: number }) => sum + order.totalAmount, 0);
+        const totalRevenue = ordersData.orders.reduce((sum: number, order: { totalAmount: number }) => sum + order.totalAmount, 0);
         setStats(prev => ({
           ...prev,
-          totalOrders: ordersData.length || 0,
+          totalOrders: ordersData.pagination.totalOrders || 0,
           totalRevenue
         }));
       }
@@ -129,7 +123,7 @@ export default function AdminDashboard() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+      const response = await fetch(`/api/products/${productId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -163,13 +157,20 @@ export default function AdminDashboard() {
 
   const handleProductSubmit = async (productData: any) => {
     setProductFormLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const url = editingProduct
-        ? `http://localhost:5000/api/products/${editingProduct._id}`
-        : 'http://localhost:5000/api/products';
-      const method = editingProduct ? 'PUT' : 'POST';
+    const token = localStorage.getItem('token');
+    console.log('Token present:', !!token);
+    console.log('Token value:', token?.substring(0, 20) + '...');
 
+    const url = editingProduct
+      ? `/api/products/${editingProduct._id}`
+      : '/api/products';
+    const method = editingProduct ? 'PUT' : 'POST';
+
+    console.log('Fetch URL:', url);
+    console.log('Fetch method:', method);
+    console.log('Product data:', productData);
+
+    try {
       const response = await fetch(url, {
         method,
         headers: {
@@ -179,17 +180,27 @@ export default function AdminDashboard() {
         body: JSON.stringify(productData)
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
       if (response.ok) {
+        console.log('Product saved successfully');
         setShowProductForm(false);
         setEditingProduct(undefined);
         fetchDashboardData(); // Refresh data
       } else {
         const error = await response.json();
+        console.error('Server error response:', error);
         alert(error.message || 'Failed to save product');
       }
     } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Failed to save product');
+      console.error('Fetch error:', error);
+      console.error('Error type:', error instanceof TypeError ? 'TypeError (likely network)' : 'Other error');
+      console.error('Error message:', (error as Error).message);
+      console.error('Error stack:', (error as Error).stack);
+      console.error('Attempted URL:', url);
+      console.error('Request method:', method);
+      alert('Failed to save product. Check console for details.');
     } finally {
       setProductFormLoading(false);
     }
@@ -365,16 +376,6 @@ export default function AdminDashboard() {
                 Add Product
               </button>
             </div>
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-lg font-medium text-gray-900">Blog Management</h2>
-              <button
-                onClick={handleAddBlog}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Blog Post
-              </button>
-            </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -435,7 +436,10 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-lg shadow-sm border">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h2 className="text-lg font-medium text-gray-900">Blog Management</h2>
-              <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <button
+                onClick={handleAddBlog}
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Blog Post
               </button>

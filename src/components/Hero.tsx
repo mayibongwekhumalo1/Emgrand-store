@@ -25,7 +25,10 @@ export default function Hero({ products }: { products?: Product[] }) {
     : [
         "https://res.cloudinary.com/dxrv8lauy/image/upload/v1750773814/samples/shoe.jpg",
         "https://res.cloudinary.com/dxrv8lauy/image/upload/v1733773814/samples/ecommerce/accessories-bag.jpg",
-        "https://res.cloudinary.com/dxrv8lauy/image/upload/v1733773814/samples/ecommerce/leather-bag-gray.jpg"
+        "https://res.cloudinary.com/dxrv8lauy/image/upload/v1733773814/samples/ecommerce/leather-bag-gray.jpg",
+        "https://res.cloudinary.com/dxrv8lauy/image/upload/v1758267080/xfxel9qp8z7smwrkt7jt.jpg",
+        "https://res.cloudinary.com/dxrv8lauy/image/upload/v1758274084/uo5vbkekih2flwcm6vcq.jpg",
+        "https://res.cloudinary.com/dxrv8lauy/image/upload/v1758790851/ecommerce-products/oxtblqy2oldtgjsbtrgm.jpg"
       ];
 
   useEffect(() => {

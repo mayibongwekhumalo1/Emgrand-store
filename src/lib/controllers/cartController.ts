@@ -2,11 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import Cart from '../models/Cart';
 import Product from '../models/Product';
 import connectDB from '../database';
+import { optionalAuthenticateRequest } from '../middleware/auth';
 
 export const getCart = async (request: NextRequest) => {
   try {
     await connectDB();
-    const cart = await Cart.findOne({ user: 'guest' })
+
+    const user = await optionalAuthenticateRequest(request);
+    const userId = user ? user.id : 'guest';
+
+    const cart = await Cart.findOne({ user: userId })
       .populate('items.product', 'name price images inventory.quantity')
       .select('-__v');
 
@@ -31,6 +36,9 @@ export const addToCart = async (request: NextRequest) => {
     const body = await request.json();
     const { productId, quantity = 1, selectedAttributes } = body;
 
+    const user = await optionalAuthenticateRequest(request);
+    const userId = user ? user.id : 'guest';
+
     // Validate product exists and is active
     const product = await Product.findById(productId);
     if (!product || !product.isActive) {
@@ -43,11 +51,11 @@ export const addToCart = async (request: NextRequest) => {
     }
 
     // Find or create cart
-    let cart = await Cart.findOne({ user: 'guest' });
+    let cart = await Cart.findOne({ user: userId });
 
     if (!cart) {
       cart = new Cart({
-        user: 'guest',
+        user: userId,
         items: [],
         totalPrice: 0,
         itemCount: 0
@@ -103,7 +111,10 @@ export const updateCartItem = async (request: NextRequest) => {
       return NextResponse.json({ message: 'Quantity must be at least 1' }, { status: 400 });
     }
 
-    const cart = await Cart.findOne({ user: 'guest' });
+    const user = await optionalAuthenticateRequest(request);
+    const userId = user ? user.id : 'guest';
+
+    const cart = await Cart.findOne({ user: userId });
     if (!cart) {
       return NextResponse.json({ message: 'Cart not found' }, { status: 404 });
     }
@@ -144,7 +155,10 @@ export const removeFromCart = async (request: NextRequest) => {
     const body = await request.json();
     const { productId, selectedAttributes } = body;
 
-    const cart = await Cart.findOne({ user: 'guest' });
+    const user = await optionalAuthenticateRequest(request);
+    const userId = user ? user.id : 'guest';
+
+    const cart = await Cart.findOne({ user: userId });
     if (!cart) {
       return NextResponse.json({ message: 'Cart not found' }, { status: 404 });
     }
@@ -176,8 +190,12 @@ export const removeFromCart = async (request: NextRequest) => {
 export const clearCart = async (request: NextRequest) => {
   try {
     await connectDB();
+
+    const user = await optionalAuthenticateRequest(request);
+    const userId = user ? user.id : 'guest';
+
     const cart = await Cart.findOneAndUpdate(
-      { user: 'guest' },
+      { user: userId },
       { items: [], totalPrice: 0, itemCount: 0 },
       { new: true }
     );
